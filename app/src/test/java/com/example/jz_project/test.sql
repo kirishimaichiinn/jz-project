@@ -1,0 +1,15 @@
+CREATE TABLE 'type' (
+  'id' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  'name' TEXT NOT NULL,
+  'group' TEXT NOT NULL
+);
+
+CREATE TABLE 'record' (
+  'id' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  'money' REAL NOT NULL,
+  'group' TEXT NOT NULL,
+  'type' TEXT NOT NULL,
+  'note' TEXT
+);
+
+INSERT INTO 'type' VALUES (1, '午饭', '餐饮'),
