@@ -6,8 +6,8 @@
     android:padding="8dp">
 
     <TextView
-        android:id="@+id/textRecordItem"
-        android:layout_width="wrap_content"
+        android:id="@+id/textTypeItem"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:background="@drawable/textview_item"

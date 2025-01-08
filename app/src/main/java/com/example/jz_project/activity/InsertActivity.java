@@ -3,10 +3,10 @@ package com.example.jz_project.activity;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import android.os.Bundle;
@@ -24,16 +24,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.jz_project.R;
+import com.example.jz_project.adapter.TypeChooseAdapter;
 import com.example.jz_project.entity.Record;
+import com.example.jz_project.utils.DataUtil;
 import com.example.jz_project.utils.SqlUtil;
 
 public class InsertActivity extends AppCompatActivity {
     private String insertType = "添加";
     private Calendar calendar;
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint({"ClickableViewAccessibility", "MissingInflatedId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,13 +56,7 @@ public class InsertActivity extends AppCompatActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 View currentFocus = getCurrentFocus();
                 if (currentFocus != null) {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
-
-                    if (!isViewInLayout(currentFocus,findViewById(R.id.layout_type_choose))){
-                        findViewById(R.id.layout_type_choose).setVisibility(View.INVISIBLE);
-                    }
-
+                    hideInputMethod(v);
                     currentFocus.clearFocus();
                 }
             }
@@ -88,6 +86,8 @@ public class InsertActivity extends AppCompatActivity {
             }
         });
         findViewById(R.id.textView_time_input).setOnClickListener(v -> {
+            hideInputMethod(v);
+
             int year = calendar.get(Calendar.YEAR);
             int month = calendar.get(Calendar.MONTH);
             int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -101,6 +101,57 @@ public class InsertActivity extends AppCompatActivity {
         });
         findViewById(R.id.textView_type_input).setOnClickListener(v -> {
             findViewById(R.id.layout_type_choose).setVisibility(View.VISIBLE);
+            findViewById(R.id.otherLayout_type_choose).setVisibility(View.VISIBLE);
+            hideInputMethod(v);
+        });
+        findViewById(R.id.otherLayout_type_choose).setOnClickListener(v -> {
+            findViewById(R.id.layout_type_choose).setVisibility(View.INVISIBLE);
+            findViewById(R.id.otherLayout_type_choose).setVisibility(View.INVISIBLE);
+            hideInputMethod(v);
+        });
+        findViewById(R.id.text_addType).setOnFocusChangeListener((v, focus) -> {
+            if (focus) {
+                findViewById(R.id.greyBackground).setVisibility(View.VISIBLE);
+            } else {
+                findViewById(R.id.greyBackground).setVisibility(View.GONE);
+            }
+        });
+        findViewById(R.id.greyBackground).setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                View currentFocus = getCurrentFocus();
+                if (currentFocus != null) {
+                    hideInputMethod(v);
+                    currentFocus.clearFocus();
+                }
+                findViewById(R.id.greyBackground).setVisibility(View.GONE);
+            }
+            return true;
+        });
+        findViewById(R.id.button_addType).setOnClickListener(v -> {
+            TextView textView = findViewById(R.id.text_addType);
+            if (!textView.getText().toString().isEmpty()){
+                SqlUtil.getDb().execSQL("INSERT INTO type VALUES (null,?)",new Object[]{textView.getText().toString()});
+                hideInputMethod(v);
+                findViewById(R.id.greyBackground).setVisibility(View.GONE);
+                refresh();
+                DataUtil.loadType();
+                textView.setText("");
+            }
+        });
+
+        RecyclerView typeRecycler = findViewById(R.id.type_recycler);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+        typeRecycler.setLayoutManager(gridLayoutManager);
+        TypeChooseAdapter typeChooseAdapter = new TypeChooseAdapter(this, DataUtil.typeList);
+        typeRecycler.setAdapter(typeChooseAdapter);
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if(position == typeChooseAdapter.messages.size()){
+                    return gridLayoutManager.getSpanCount();
+                }
+                return 1;
+            }
         });
 
 
@@ -175,20 +226,20 @@ public class InsertActivity extends AppCompatActivity {
         noteView.setText(getIntent().getStringExtra("record_note"));
     }
 
-    private boolean isViewInLayout(View view, ViewGroup layout) {
-        if (view == null || layout == null) {
-            return false;
-        }
-        if (view == layout) {
-            return true;
-        }
-        ViewParent parent = view.getParent();
-        while (parent != null && parent instanceof ViewGroup) {
-            if (parent == layout) {
-                return true;
-            }
-            parent = parent.getParent();
-        }
-        return false;
+    private void hideInputMethod(View view){
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public void refresh() {
+        RecyclerView typeRecycler = findViewById(R.id.type_recycler);
+        typeRecycler.getAdapter().notifyDataSetChanged();
+        typeRecycler.scrollToPosition(DataUtil.typeList.size());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refresh();
     }
 }

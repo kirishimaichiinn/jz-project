@@ -26,14 +26,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.jz_project.R;
 import com.example.jz_project.adapter.RecordAdapter;
 import com.example.jz_project.entity.Record;
+import com.example.jz_project.utils.DataUtil;
 import com.example.jz_project.utils.SqlUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private boolean menuOpen = false;
-    private List<Record> messageList = new ArrayList<>();
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -48,10 +47,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         SqlUtil sqlUtil = new SqlUtil(this);
+        DataUtil.init();
 
         ActivityResultLauncher<Intent> jumpToInsert = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
+                    DataUtil.loadMessages();
                     refresh();
                 }
         );
@@ -65,33 +66,14 @@ public class MainActivity extends AppCompatActivity {
         layoutManager.setReverseLayout(true);
         layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
-        RecordAdapter recordAdapter = new RecordAdapter(this,jumpToInsert,loadMessages());
+        RecordAdapter recordAdapter = new RecordAdapter(this,jumpToInsert,DataUtil.messageList);
         recyclerView.setAdapter(recordAdapter);
         recyclerView.scrollToPosition(0);
 
-
     }
 
-    private List<Record> loadMessages() {
-        messageList.clear();
-        Cursor cursor = SqlUtil.getDb().rawQuery("select * from record order by time DESC, id DESC LIMIT 20", null);
-        if (cursor.moveToFirst()) {
-            do {
-                Record record = new Record();
-                record.setId(cursor.getInt(0));
-                record.setMoney(cursor.getDouble(1));
-                record.setType(cursor.getString(2));
-                record.setTime(cursor.getString(3));
-                record.setNote(cursor.getString(4));
-                messageList.add(record);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return messageList;
-    }
 
-    private void refresh() {
-        loadMessages();
+    public void refresh() {
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.getAdapter().notifyDataSetChanged();
         recyclerView.scrollToPosition(0);
