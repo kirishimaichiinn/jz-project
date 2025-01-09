@@ -66,7 +66,7 @@ public class TypeManageActivity extends AppCompatActivity {
                 DataUtil.loadType();
                 RecyclerView typeRecycler = findViewById(R.id.typeManage_recycler);
                 typeRecycler.getAdapter().notifyDataSetChanged();
-                typeRecycler.scrollToPosition(DataUtil.typeList.size());
+                typeRecycler.scrollToPosition(DataUtil.typeList.size() - 1);
                 textView.setText("");
             }
         });
