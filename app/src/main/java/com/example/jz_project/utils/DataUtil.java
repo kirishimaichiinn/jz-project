@@ -7,19 +7,21 @@ import com.example.jz_project.entity.Record;
 import com.example.jz_project.entity.Type;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class DataUtil {
     public static List<Record> messageList;
     public static List<Type> typeList;
 
-    public static void init(Context context){
+    public static void init(Context context) {
         SqlUtil sqlUtil = new SqlUtil(context);
-        if(messageList == null) {
+        if (messageList == null) {
             messageList = new ArrayList<>();
             loadMessages();
         }
-        if(typeList == null) {
+        if (typeList == null) {
             typeList = new ArrayList<>();
             loadType();
         }
@@ -40,6 +42,21 @@ public class DataUtil {
             } while (cursor.moveToNext());
         }
         cursor.close();
+
+        Collections.sort(messageList, new Comparator<Record>() {
+            @Override
+            public int compare(Record o1, Record o2) {
+                return convertDateString(o2.time).compareTo(convertDateString(o1.time));
+            }
+
+            private String convertDateString(String date) {
+                String[] parts = date.split("-");
+                String year = parts[0];
+                String month = parts[1].length() == 1 ? "0" + parts[1] : parts[1];
+                String day = parts[2].length() == 1 ? "0" + parts[2] : parts[2];
+                return year + "-" + month + "-" + day;
+            }
+        });
         return messageList;
     }
 

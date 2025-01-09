@@ -214,6 +214,7 @@ public class InsertActivity extends AppCompatActivity {
         Record record = getRecord();
         if (record == null) return false;
         SqlUtil.getDb().execSQL("INSERT INTO record values (null,?,?,?,?)", new Object[]{record.money, record.type, record.time, record.note});
+        DataUtil.loadMessages();
         return true;
     }
 
@@ -222,11 +223,13 @@ public class InsertActivity extends AppCompatActivity {
         if(record == null) return false;
         record.id = Integer.valueOf(getIntent().getStringExtra("record_id"));
         SqlUtil.getDb().execSQL("UPDATE record SET money = ?, type = ?, time = ?, note = ? WHERE id = ?", new Object[]{record.money, record.type, record.time, record.note, record.id});
+        DataUtil.loadMessages();
         return true;
     }
 
     private void deleteData() {
         SqlUtil.getDb().execSQL("DELETE FROM record WHERE id = ?", new Object[]{Integer.valueOf(getIntent().getStringExtra("record_id"))});
+        DataUtil.loadMessages();
     }
 
     private void fillPage() {

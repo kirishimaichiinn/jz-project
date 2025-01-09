@@ -64,7 +64,6 @@ public class SearchResultActivity extends AppCompatActivity {
         ActivityResultLauncher<Intent> activityResult = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    DataUtil.loadMessages();
                     refresh();
                 }
         );

@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         ActivityResultLauncher<Intent> activityResult = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    DataUtil.loadMessages();
                     refresh();
                 }
         );

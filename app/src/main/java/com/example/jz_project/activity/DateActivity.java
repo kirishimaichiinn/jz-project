@@ -45,7 +45,6 @@ public class DateActivity extends AppCompatActivity {
         ActivityResultLauncher<Intent> activityResult = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    DataUtil.loadMessages();
                     refresh();
                 }
         );
@@ -68,6 +67,8 @@ public class DateActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.date_recycler);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setReverseLayout(true);
+        layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
         RecordAdapter recordAdapter = new RecordAdapter(this,activityResult, selectRecords(selectDate));
         recyclerView.setAdapter(recordAdapter);
