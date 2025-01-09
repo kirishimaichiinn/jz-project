@@ -1,5 +1,6 @@
 package com.example.jz_project.utils;
 
+import android.content.Context;
 import android.database.Cursor;
 
 import com.example.jz_project.entity.Record;
@@ -12,7 +13,8 @@ public class DataUtil {
     public static List<Record> messageList;
     public static List<Type> typeList;
 
-    public static void init(){
+    public static void init(Context context){
+        SqlUtil sqlUtil = new SqlUtil(context);
         if(messageList == null) {
             messageList = new ArrayList<>();
             loadMessages();
@@ -25,7 +27,7 @@ public class DataUtil {
 
     public static List<Record> loadMessages() {
         messageList.clear();
-        Cursor cursor = SqlUtil.getDb().rawQuery("select * from record order by time DESC, id DESC LIMIT 20", null);
+        Cursor cursor = SqlUtil.getDb().rawQuery("select * from record order by time DESC, id DESC", null);
         if (cursor.moveToFirst()) {
             do {
                 Record record = new Record();

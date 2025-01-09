@@ -61,6 +61,10 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.RecordView
         return this.messages.size();
     }
 
+    public void setMessages(List<Record> messages) {
+        this.messages = messages;
+    }
+
     public static class RecordViewHolder extends RecyclerView.ViewHolder {
         public TextView messageTextView;
         public Record record;

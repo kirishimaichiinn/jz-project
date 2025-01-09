@@ -2,24 +2,16 @@ package com.example.jz_project.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.CalendarView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,24 +21,26 @@ import com.example.jz_project.entity.Record;
 import com.example.jz_project.utils.DataUtil;
 import com.example.jz_project.utils.SqlUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class DateActivity extends AppCompatActivity {
+    private String selectDate = new SimpleDateFormat("yyyy-M-d", Locale.CHINA).format(new Date());
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_date);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
-        DataUtil.init(this);
 
         ActivityResultLauncher<Intent> activityResult = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -55,38 +49,48 @@ public class MainActivity extends AppCompatActivity {
                     refresh();
                 }
         );
-        findViewById(R.id.buttonInsert).setOnClickListener(v -> {
+
+        CalendarView calendarView = findViewById(R.id.calendarView);
+        calendarView.setOnDateChangeListener(((view, year, month, dayOfMonth) -> {
+            selectDate = year + "-" + (month + 1) + "-" + dayOfMonth;
+            refresh();
+        }));
+        findViewById(R.id.date_back).setOnClickListener(v -> {
+            finish();
+        });
+        findViewById(R.id.date_insert).setOnClickListener(v -> {
             Intent intent = new Intent(this, InsertActivity.class);
-            activityResult.launch(intent);
-        });
-        findViewById(R.id.imageButton).setOnClickListener(v -> {
-            Intent intent = new Intent(this, DateActivity.class);
-            activityResult.launch(intent);
-        });
-        findViewById(R.id.viewToSearch).setOnClickListener(v -> {
-            Intent intent = new Intent(this, SearchResultActivity.class);
-            activityResult.launch(intent);
-        });
-        findViewById(R.id.imageButton2).setOnClickListener(v -> {
-            Intent intent = new Intent(this, SettingActivity.class);
+            intent.putExtra("insert_date",selectDate);
             activityResult.launch(intent);
         });
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+
+
+        RecyclerView recyclerView = findViewById(R.id.date_recycler);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setReverseLayout(true);
-        layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
-        RecordAdapter recordAdapter = new RecordAdapter(this,activityResult,DataUtil.messageList);
+        RecordAdapter recordAdapter = new RecordAdapter(this,activityResult, selectRecords(selectDate));
         recyclerView.setAdapter(recordAdapter);
         recyclerView.scrollToPosition(0);
 
     }
 
-
     public void refresh() {
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.getAdapter().notifyDataSetChanged();
+        RecyclerView recyclerView = findViewById(R.id.date_recycler);
+        RecordAdapter adapter = (RecordAdapter) recyclerView.getAdapter();
+        adapter.setMessages(selectRecords(selectDate));
+        adapter.notifyDataSetChanged();
         recyclerView.scrollToPosition(0);
+    }
+
+    public List<Record> selectRecords(String date){
+        List<Record> messageList = DataUtil.messageList;
+        List<Record> selectList = new ArrayList<>();
+        for (Record record : messageList){
+            if (record.time.equals(date)){
+                selectList.add(record);
+            }
+        }
+        return selectList;
     }
 }

@@ -63,12 +63,16 @@ public class InsertActivity extends AppCompatActivity {
             return false;
         });
         findViewById(R.id.insert_back).setOnClickListener(v -> finish());
+        findViewById(R.id.insert_back2).setOnClickListener(v -> finish());
         findViewById(R.id.insert_enter).setOnClickListener(v -> {
             switch (insertType) {
-                case "添加" -> insertData();
-                case "详情" -> updateData();
+                case "添加" -> {
+                    if(insertData()) finish();
+                }
+                case "详情" -> {
+                    if(updateData()) finish();
+                }
             }
-            finish();
         });
         findViewById(R.id.insert_delete).setOnClickListener(v -> {
             if (insertType.equals("详情")) {
@@ -174,6 +178,13 @@ public class InsertActivity extends AppCompatActivity {
             String date = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);
             timeView.setText(date);
         }
+
+        String insertDate = intent.getStringExtra("insert_date");
+        if(insertDate != null && !insertDate.isEmpty()){
+            TextView timeView = findViewById(R.id.textView_time_input);
+            timeView.setText(insertDate);
+        }
+
     }
 
     private Record getRecord() {
@@ -192,22 +203,26 @@ public class InsertActivity extends AppCompatActivity {
             time = timeView.getText().toString();
             note = noteView.getText().toString();
         } catch (Exception e) {
-            Toast.makeText(this, "数据有误", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "数据有误", Toast.LENGTH_SHORT).show();
+            return null;
         }
 
         return new Record(null, money, type, time, note);
     }
 
-    private void insertData() {
+    private Boolean insertData() {
         Record record = getRecord();
-
+        if (record == null) return false;
         SqlUtil.getDb().execSQL("INSERT INTO record values (null,?,?,?,?)", new Object[]{record.money, record.type, record.time, record.note});
+        return true;
     }
 
-    private void updateData() {
+    private Boolean updateData() {
         Record record = getRecord();
+        if(record == null) return false;
         record.id = Integer.valueOf(getIntent().getStringExtra("record_id"));
         SqlUtil.getDb().execSQL("UPDATE record SET money = ?, type = ?, time = ?, note = ? WHERE id = ?", new Object[]{record.money, record.type, record.time, record.note, record.id});
+        return true;
     }
 
     private void deleteData() {

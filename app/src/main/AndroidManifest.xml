@@ -13,9 +13,18 @@
         android:theme="@style/Theme.Jzproject"
         tools:targetApi="31">
         <activity
+            android:name=".activity.SettingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.SearchResultActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.DateActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.TypeManageActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activity.InsertActivity"
             android:exported="false"
