@@ -85,6 +85,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="right"
+                android:maxLines="2"
+                android:scrollHorizontally="true"
                 android:text="其他"
                 android:textSize="24sp" />
         </LinearLayout>
@@ -157,6 +159,8 @@
                 android:layout_weight="1"
                 android:gravity="right"
                 android:hint="备注"
+                android:maxLines="3"
+                android:scrollHorizontally="true"
                 android:text=""
                 android:textSize="24sp" />
         </LinearLayout>
